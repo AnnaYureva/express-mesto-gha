@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR } = require('../utils');
 
 const getCards = (req, res) => {
   Card.find({})
@@ -13,9 +14,9 @@ const createCard = (req, res) => {
     .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Введены некорректные данные' });
+        return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
       }
-      return res.status(500).send({ message: 'Ошибка при создании карточки' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при создании карточки' });
     });
 };
 
@@ -25,10 +26,13 @@ const deleteCard = (req, res) => {
       res.send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({ message: 'Карточка с таким ID не найдена' });
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
       }
-      return res.status(500).send({ message: 'Ошибка при удалении карточки' });
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(NOT_FOUND).send({ message: 'Карточка с таким ID не найдена' });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при удалении карточки' });
     });
 };
 
@@ -42,12 +46,18 @@ const likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
+        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
       }
       res.send({ data: card });
     })
-    .catch(() => res.status(500).send({ message: 'Ошибка при постановке лайка' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
+        return;
+      }
+      res.status(DEFAULT_ERROR).send({ message: 'Ошибка при постановке лайка' });
+    });
 };
 
 // функция дизлайка
@@ -60,13 +70,17 @@ const dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Карточка не найдена' });
+        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
 
       return res.send({ data: card });
     })
-    .catch(() => {
-      res.status(500).send({ message: 'Ошибка при постановке лайка' });
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
+        return;
+      }
+      res.status(DEFAULT_ERROR).send({ message: 'Ошибка при постановке лайка' });
     });
 };
 

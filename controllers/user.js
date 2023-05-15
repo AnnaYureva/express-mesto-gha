@@ -1,10 +1,11 @@
 const User = require('../models/user');
+const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR } = require('../utils');
 
 // получаем данные обо всех пользователях
 
 const getUsers = (req, res) => {
   User.find({})
-    .catch(() => res.status(500).send({ message: 'Ошибка при получении данных пользователей' }))
+    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Ошибка при получении данных пользователей' }))
     .then((users) => res.send(users));
 };
 
@@ -14,10 +15,14 @@ const getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((users) => res.send(users))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: 'Неверный запрос' });
       }
-      return res.status(500).send({ message: 'Ошибка при получении данных о пользователе' });
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+      }
+
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при получении данных о пользователе' });
     });
 };
 
@@ -29,9 +34,9 @@ const createUser = (req, res) => {
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Некорректные данные пользователя' });
+        return res.status(BAD_REQUEST).send({ message: 'Некорректные данные пользователя' });
       }
-      return res.status(500).send({ message: 'Ошибка при создании пользователя' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при создании пользователя' });
     });
 };
 
@@ -46,10 +51,13 @@ const updateProfile = (req, res) => {
   )
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).send({ message: 'Некорректные данные профиля' });
       }
-      return res.status(500).send({ message: 'Ошибка при обновлении данных пользователя' });
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при обновлении данных пользователя' });
     });
 };
 
@@ -64,9 +72,9 @@ const updateAvatar = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
       }
-      return res.status(500).send({ message: 'Ошибка при обновлении аватара' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при обновлении аватара' });
     });
 };
 
