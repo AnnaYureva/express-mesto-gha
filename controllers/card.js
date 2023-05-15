@@ -23,14 +23,14 @@ const createCard = (req, res) => {
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND).send({ message: 'Карточка с таким ID не найдена' });
+      }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
-      }
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOT_FOUND).send({ message: 'Карточка с таким ID не найдена' });
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при удалении карточки' });
     });

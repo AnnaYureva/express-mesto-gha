@@ -13,15 +13,16 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .then((users) => res.send(users))
+    .then((user) => {
+      if (!user) {
+        res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+      }
+      res.send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(BAD_REQUEST).send({ message: 'Неверный запрос' });
       }
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
-      }
-
       return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при получении данных о пользователе' });
     });
 };
