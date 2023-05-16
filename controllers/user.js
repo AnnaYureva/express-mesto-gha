@@ -19,7 +19,7 @@ const getUserById = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(BAD_REQUEST).send({ message: 'Неверный запрос' });
       }
-      if (err.name === 'ValidationError') {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при получении данных о пользователе' });

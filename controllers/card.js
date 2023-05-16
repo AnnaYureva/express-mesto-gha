@@ -28,7 +28,7 @@ const deleteCard = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
       }
-      if (err.name === 'ValidationError') {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(NOT_FOUND).send({ message: 'Карточка с таким ID не найдена' });
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при удалении карточки' });
