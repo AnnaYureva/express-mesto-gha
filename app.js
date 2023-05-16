@@ -10,7 +10,7 @@ const { PORT = 3000 } = process.env;
 // создаем переменную с параметрами лимитера
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 минута
-  max: 10, // лимит на 10 запросов в минуту от одного айпи
+  max: 50, // лимит на 10 запросов в минуту от одного айпи
   standardHeaders: true, // вернуть информцию об ограничениях в заголовки `RateLimit-*`
   legacyHeaders: false, // Отключить заголовки `X-RateLimit-*`
 });
