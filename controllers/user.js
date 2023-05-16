@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR } = require('../utils');
+const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR } = require('../utils/errors');
 
 // получаем данные обо всех пользователях
 
@@ -13,15 +13,14 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) {
-        res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
-      }
-      res.send({ data: user });
-    })
+    .orFail()
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(BAD_REQUEST).send({ message: 'Неверный запрос' });
+      }
+      if (err.name === 'ValidationError') {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при получении данных о пользователе' });
     });
@@ -50,6 +49,7 @@ const updateProfile = (req, res) => {
     { name, about },
     { new: true, runValidators: true },
   )
+    .orFail()
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -70,6 +70,7 @@ const updateAvatar = (req, res) => {
     { avatar },
     { new: true, runValidators: true },
   )
+    .orFail()
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {

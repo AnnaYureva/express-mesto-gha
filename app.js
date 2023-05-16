@@ -1,12 +1,27 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const router = require('./routes/index');
 
 // Слушаем 300 порт
 const { PORT = 3000 } = process.env;
 
+// создаем переменную с параметрами лимитера
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 минута
+  max: 10, // лимит на 10 запросов в минуту от одного айпи
+  standardHeaders: true, // вернуть информцию об ограничениях в заголовки `RateLimit-*`
+  legacyHeaders: false, // Отключить заголовки `X-RateLimit-*`
+});
+
 // создание инстанса сервера
 const app = express();
+
+app.use(helmet());
+
+// применяем миллдвэр ко всем запросам
+app.use(limiter);
 
 // делаем запрос объектом json
 app.use(express.json());

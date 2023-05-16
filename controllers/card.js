@@ -1,17 +1,17 @@
 const Card = require('../models/card');
-const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR } = require('../utils');
+const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR } = require('../utils/errors');
 
 const getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: 'Ошибка при получении карточек' }));
+    .then((cards) => res.send(cards))
+    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Ошибка при получении карточек' }));
 };
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(201).send({ data: card }))
+    .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
@@ -22,15 +22,14 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (!card) {
-        res.status(NOT_FOUND).send({ message: 'Карточка с таким ID не найдена' });
-      }
-      res.send({ data: card });
-    })
+    .orFail()
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
+      }
+      if (err.name === 'ValidationError') {
+        return res.status(NOT_FOUND).send({ message: 'Карточка с таким ID не найдена' });
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при удалении карточки' });
     });
@@ -49,7 +48,7 @@ const likeCard = (req, res) => {
         res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
       }
-      res.send({ data: card });
+      res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -72,8 +71,7 @@ const dislikeCard = (req, res) => {
       if (!card) {
         return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
-
-      return res.send({ data: card });
+      return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
