@@ -123,12 +123,20 @@ const login = (req, res, next) => {
 // контроллер для получения информации о пользователе
 
 const getCurrentUser = (req, res, next) => {
-  const { userId } = req.params;
-  return User.findById(userId)
+  const { userId } = req.user;
+  User.findById(userId)
     .then((user) => {
-      res.send(user);
+      if (user) {
+        return res.send({ user });
+      }
+      return res.status(NOT_FOUND).send({ message: 'Пользователь с таким ID не найден' });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: 'Некорректный ID' });
+      }
+      return next(err);
+    });
 };
 
 module.exports = {
