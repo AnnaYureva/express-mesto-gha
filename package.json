@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yandex-praktikum/express-mesto-gha.git"
+    "url": "git+https://github.com/AnnaYureva/express-mesto-gha"
   },
   "author": "Anna Yureva",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/yandex-praktikum/express-mesto-gha/issues"
+    "url": "https://github.com/AnnaYureva/express-mesto-gha/issues"
   },
-  "homepage": "https://github.com/yandex-praktikum/express-mesto-gha#readme",
+  "homepage": "https://github.com/AnnaYureva/express-mesto-gha#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "celebrate": "^15.0.1",
