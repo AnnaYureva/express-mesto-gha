@@ -17,7 +17,7 @@ const getUsers = (req, res, next) => {
 // получаем данные о пользователе по айди
 
 const getUserById = (req, res, next) => {
-  User.findById(req.params.userId)
+  User.findById(req.params._id)
     .orFail()
     .then((user) => res.send(user))
     .catch((err) => {
@@ -122,11 +122,19 @@ const login = (req, res, next) => {
 // контроллер для получения информации о пользователе
 
 const getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
-    .then((user) => {
-      res.send(user);
-    })
-    .catch(next);
+  const { userId } = req.params;
+  User.findById(userId)
+    .orFail()
+    .then((user) => res.status(200).send({ user }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: 'Некорректные данные' });
+      }
+      if (err.message === 'NotFound') {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+      }
+      return next(err);
+    });
 };
 
 module.exports = {
