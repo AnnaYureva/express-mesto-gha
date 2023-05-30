@@ -1,8 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const { errors } = require('celebrate');
 const rateLimit = require('express-rate-limit');
+const { errors } = require('celebrate');
 const router = require('./routes/index');
 const { createUser, login } = require('./controllers/user');
 const auth = require('./middlewares/auth');
@@ -40,10 +40,9 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 app.post('/signin', loginValidation, login); // валидация запроса происходит до его передачи контроллеру
 app.post('/signup', createUserValidation, createUser);
 
-// подключаем роуты
 app.use(auth); // авторизация
-app.use(error); // обработка ошибок
-app.use(errors());
+app.use(errors()); // обработка ошибок
+app.use(error);
 app.use('/', router);
 
 // запускаем сервер
