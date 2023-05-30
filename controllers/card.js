@@ -10,8 +10,8 @@ const getCards = (req, res, next) => {
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
-  Card.create({ name, link, owner })
-    .then((card) => res.status(201).send(card))
+  return Card.create({ name, link, owner })
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
@@ -22,7 +22,7 @@ const createCard = (req, res, next) => {
 
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  Card.findById(cardId)
+  return Card.findById(cardId)
     .orFail()
     .then((card) => {
       if (card.owner.toString() === req.user._id) {
@@ -54,7 +54,7 @@ const likeCard = (req, res, next) => {
         res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
       }
-      res.send(card);
+      res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
