@@ -7,7 +7,7 @@ const { createUser, login } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const error = require('./middlewares/error');
 
-const { loginValidation, createCardValidation } = require('./middlewares/validator');
+const { loginValidation, createUserValidation } = require('./middlewares/validator');
 
 // Слушаем 300 порт
 const { PORT = 3000 } = process.env;
@@ -37,7 +37,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 // роуты для логина и регистрации
 
 app.post('/signin', loginValidation, login); // валидация запроса происходит до его передачи контроллеру
-app.post('/signup', createCardValidation, createUser);
+app.post('/signup', createUserValidation, createUser);
 
 // подключаем роуты
 app.use(auth); // авторизация

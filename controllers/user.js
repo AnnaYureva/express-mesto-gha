@@ -44,11 +44,11 @@ const createUser = (req, res, next) => {
     }))
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Некорректные данные пользователя' });
-      }
       if (err.code === 11000) {
         return res.status(CONFLICT).send({ message: 'Пользователь с таким email уже существует' });
+      }
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).send({ message: 'Некорректные данные пользователя' });
       }
       return next(err);
     });
