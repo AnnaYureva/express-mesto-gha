@@ -5,15 +5,21 @@ const userRouter = require('express').Router();
 const {
   getUsers,
   getUserById,
-  createUser,
   updateProfile,
   updateAvatar,
+  getCurrentUser,
 } = require('../controllers/user');
 
+// импортируем функции валидации
+
+const {
+  updateUserValidation, updateAvatarValidation, userIdValidation,
+} = require('../middlewares/validator');
+
 userRouter.get('/', getUsers); // получение всех пользователей
-userRouter.get('/:userId', getUserById); // получение пользователя по _id
-userRouter.post('/', createUser); // создание пользователя
-userRouter.patch('/me', updateProfile); // обновление данных профиля
-userRouter.patch('/me/avatar', updateAvatar); // обновление автара
+userRouter.get('/:userId', userIdValidation, getUserById); // получение пользователя по _id
+userRouter.get('/me', getCurrentUser); // получение информации о пользователе
+userRouter.patch('/me', updateUserValidation, updateProfile); // обновление данных профиля
+userRouter.patch('/me/avatar', updateAvatarValidation, updateAvatar); // обновление автара
 
 module.exports = userRouter;

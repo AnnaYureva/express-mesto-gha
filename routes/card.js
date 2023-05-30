@@ -10,10 +10,16 @@ const {
   dislikeCard,
 } = require('../controllers/card');
 
+// импортируем функции валидации
+
+const {
+  createCardValidation, cardIdValidation,
+} = require('../middlewares/validator');
+
 cardRouter.get('/', getCards); // получение всех карточек
-cardRouter.post('/', createCard); // создание новой карточки
-cardRouter.delete('/:cardId', deleteCard); // удалить карточку по айди
-cardRouter.put('/:cardId/likes', likeCard); // лайк карточки
-cardRouter.delete('/:cardId/likes', dislikeCard); // дизлайк карточки
+cardRouter.post('/', createCardValidation, createCard); // создание новой карточки
+cardRouter.delete('/:cardId', cardIdValidation, deleteCard); // удалить карточку по айди
+cardRouter.put('/:cardId/likes', cardIdValidation, likeCard); // лайк карточки
+cardRouter.delete('/:cardId/likes', cardIdValidation, dislikeCard); // дизлайк карточки
 
 module.exports = cardRouter;

@@ -3,6 +3,11 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const router = require('./routes/index');
+const { createUser, login } = require('./controllers/user');
+const auth = require('./middlewares/auth');
+const error = require('./middlewares/error');
+
+const { loginValidation, createCardValidation } = require('./middlewares/validator');
 
 // Слушаем 300 порт
 const { PORT = 3000 } = process.env;
@@ -29,15 +34,14 @@ app.use(express.json());
 // соединение с БД
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
-// добавили в каждый запрос объект user
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6460f11c86e4c9f300ff3cc6',
-  };
-  next();
-});
+// роуты для логина и регистрации
+
+app.post('/signin', loginValidation, login); // валидация запроса происходит до его передачи контроллеру
+app.post('/signup', createCardValidation, createUser);
 
 // подключаем роуты
+app.use(auth); // авторизация
+app.use(error); // обработка ошибок
 app.use('/', router);
 
 // запускаем сервер

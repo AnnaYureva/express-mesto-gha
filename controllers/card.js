@@ -1,13 +1,13 @@
 const Card = require('../models/card');
-const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR } = require('../utils/errors');
+const { BAD_REQUEST, NOT_FOUND, FORBIDDEN } = require('../utils/errors');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Ошибка при получении карточек' }));
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
@@ -16,14 +16,20 @@ const createCard = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при создании карточки' });
+      return next(err);
     });
 };
 
-const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+const deleteCard = (req, res, next) => {
+  const { cardId } = req.params;
+  Card.findById(cardId)
     .orFail()
-    .then((card) => res.send(card))
+    .then((card) => {
+      if (card.owner.toString() === req.user._id) {
+        return Card.findByIdAndRemove(cardId).then(() => res.status(200).send(card));
+      }
+      return res.status(FORBIDDEN).send({ message: 'Ошибка доступа' });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
@@ -31,13 +37,13 @@ const deleteCard = (req, res) => {
       if (err.name === 'DocumentNotFoundError') {
         return res.status(NOT_FOUND).send({ message: 'Карточка с таким ID не найдена' });
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка при удалении карточки' });
+      return next(err);
     });
 };
 
 // функция лайка
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -55,13 +61,13 @@ const likeCard = (req, res) => {
         res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
         return;
       }
-      res.status(DEFAULT_ERROR).send({ message: 'Ошибка при постановке лайка' });
+      next(err);
     });
 };
 
 // функция дизлайка
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -78,7 +84,7 @@ const dislikeCard = (req, res) => {
         res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
         return;
       }
-      res.status(DEFAULT_ERROR).send({ message: 'Ошибка при постановке лайка' });
+      next(err);
     });
 };
 
