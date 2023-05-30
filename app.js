@@ -41,9 +41,9 @@ app.post('/signin', loginValidation, login); // валидация запрос�
 app.post('/signup', createUserValidation, createUser);
 
 app.use(auth); // авторизация
+app.use('/', router);
 app.use(errors()); // обработка ошибок
 app.use(error);
-app.use('/', router);
 
 // запускаем сервер
 app.listen(PORT, () => {
