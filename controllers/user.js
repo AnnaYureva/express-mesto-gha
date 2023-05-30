@@ -35,14 +35,19 @@ const getUserById = (req, res, next) => {
 
 const createUser = (req, res, next) => {
   const {
-    name, about, avatar, email,
+    name, about, avatar, email, password,
   } = req.body;
   bcrypt
-    .hash(req.body.password, 10)
+    .hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(201).send(user))
+    .then((user) => {
+      const { _id } = user;
+      res.status(201).send({
+        name, about, avatar, email, _id,
+      });
+    })
     .catch((err) => {
       if (err.code === 11000) {
         return res.status(CONFLICT).send({ message: 'Пользователь с таким email уже существует' });
