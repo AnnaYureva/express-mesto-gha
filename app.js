@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const { errors } = require('celebrate');
 const rateLimit = require('express-rate-limit');
 const router = require('./routes/index');
 const { createUser, login } = require('./controllers/user');
@@ -42,6 +43,7 @@ app.post('/signup', createUserValidation, createUser);
 // подключаем роуты
 app.use(auth); // авторизация
 app.use(error); // обработка ошибок
+app.use(errors());
 app.use('/', router);
 
 // запускаем сервер
