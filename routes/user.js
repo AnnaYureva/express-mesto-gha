@@ -16,8 +16,8 @@ const {
   updateUserValidation, updateAvatarValidation, userIdValidation,
 } = require('../middlewares/validator');
 
-userRouter.get('/', getUsers); // получение всех пользователей
 userRouter.get('/me', getCurrentUser); // получение информации о пользователе
+userRouter.get('/', getUsers); // получение всех пользователей
 userRouter.get('/:userId', userIdValidation, getUserById); // получение пользователя по _id
 userRouter.patch('/me', updateUserValidation, updateProfile); // обновление данных профиля
 userRouter.patch('/me/avatar', updateAvatarValidation, updateAvatar); // обновление автара
