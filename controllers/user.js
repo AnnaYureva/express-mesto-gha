@@ -123,7 +123,7 @@ const login = (req, res, next) => {
 // контроллер для получения информации о пользователе
 
 const getCurrentUser = (req, res, next) => {
-  const { userId } = req.user;
+  const { userId } = req.user._id;
   User.findById(userId)
     .orFail(() => {
       throw res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
