@@ -43,7 +43,12 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(201).send(user))
+    .then((user) => {
+      const { _id } = user;
+      res.status(201).send({
+        name, about, avatar, email, _id,
+      });
+    })
     .catch((err) => {
       if (err.code === 11000) {
         return res.status(CONFLICT).send({ message: 'Пользователь с таким email уже существует' });
