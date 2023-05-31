@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
-  BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR, AUTH_ERROR, CONFLICT,
+  BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR, CONFLICT, AUTH_ERROR,
 } = require('../utils/errors');
 
 // получаем данные обо всех пользователях
@@ -105,19 +105,15 @@ const updateAvatar = (req, res, next) => {
 // создаем контроллер логин
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email }).select('+password')
-    .then((user) => {
-      if (!user) {
-        return res.status(AUTH_ERROR).send({ message: 'Неправильные почта или пароль' });
+  User.findUserByCredentials(email, password)
+    .then(({ _id: userId }) => {
+      if (userId) {
+        const token = jwt.sign({ userId }, 'some-secret-key', {
+          expiresIn: '7d',
+        });
+        return res.send({ _id: token });
       }
-      return bcrypt.compare(password, user.password);
-    })
-    .then((matched) => {
-      if (!matched) {
-        return res.status(AUTH_ERROR).send({ message: 'Неправильные почта или пароль' });
-      }
-      const token = jwt.sign({ _id: User._id }, 'some-secret-key', { expiresIn: '7d' });
-      return res.send({ token });
+      return res.status(AUTH_ERROR).send({ message: 'Неправильные почта или пароль' });
     })
     .catch(next);
 };
