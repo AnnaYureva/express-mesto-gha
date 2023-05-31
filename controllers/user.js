@@ -105,13 +105,12 @@ const updateAvatar = (req, res, next) => {
 // создаем контроллер логин
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findUserByCredentials(email, password)
-    .then(({ _id: userId }) => {
-      if (userId) {
-        const token = jwt.sign({ userId }, 'some-secret-key', {
-          expiresIn: '7d',
-        });
-        return res.send({ _id: token });
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      if (user) {
+        const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+        res.send({ token });
       }
       return res.status(AUTH_ERROR).send({ message: 'Неправильные почта или пароль' });
     })
@@ -121,8 +120,7 @@ const login = (req, res, next) => {
 // контроллер для получения информации о пользователе
 
 const getCurrentUser = (req, res, next) => {
-  const { _id } = req.user;
-  User.findById(_id)
+  User.findById(req.user._id)
     .orFail()
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
