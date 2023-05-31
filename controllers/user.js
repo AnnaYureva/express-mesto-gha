@@ -121,10 +121,17 @@ const login = (req, res, next) => {
 
 const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .then((user) => {
-      res.send(user);
-    })
-    .catch(next);
+    .orFail()
+    .then((user) => res.status(200).send({ user }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: 'Некорректный ID' });
+      }
+      if (err.message === 'NotFound') {
+        res.status(NOT_FOUND).send({ message: 'Пользователь с таким ID не найден' });
+      }
+      return next(err);
+    });
 };
 
 module.exports = {
