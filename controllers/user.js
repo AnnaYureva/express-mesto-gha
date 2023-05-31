@@ -43,12 +43,7 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => {
-      const { _id } = user;
-      res.status(201).send({
-        name, about, avatar, email, _id,
-      });
-    })
+    .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.code === 11000) {
         return res.status(CONFLICT).send({ message: 'Пользователь с таким email уже существует' });
@@ -125,10 +120,9 @@ const login = (req, res, next) => {
 // контроллер для получения информации о пользователе
 
 const getCurrentUser = (req, res, next) => {
-  const { userId } = req.user._id;
-  User.findById(userId)
+  User.findById(req.user._id)
     .orFail()
-    .then((user) => res.send(user))
+    .then((user) => res.status(200).send({ user }))
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(BAD_REQUEST).send({ message: 'Некорректный ID' });
