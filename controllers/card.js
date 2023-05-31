@@ -30,14 +30,14 @@ const deleteCard = (req, res, next) => {
       if (card.owner.toString() === req.user._id) {
         return Card.findByIdAndRemove(cardId).then(() => res.status(200).send(card));
       }
-      return new ForbiddenError('Ошибка доступа');
+      return next(new ForbiddenError('Ошибка доступа'));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return new BadRequestError('Введены некорректные данные');
+        next(new BadRequestError('Введены некорректные данные'));
       }
       if (err.name === 'DocumentNotFoundError') {
-        return new NotFoundError('Карточка с таким ID не найдена');
+        next(new NotFoundError('Карточка с таким ID не найдена'));
       }
       return next(err);
     });
