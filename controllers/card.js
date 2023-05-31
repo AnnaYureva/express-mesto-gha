@@ -1,5 +1,7 @@
 const Card = require('../models/card');
-const { BAD_REQUEST, NOT_FOUND, FORBIDDEN } = require('../utils/errors');
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
 
 const getCards = (req, res, next) => {
   Card.find({})
@@ -14,7 +16,7 @@ const createCard = (req, res, next) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
+        next(new BadRequestError('Введены некорректные данные'));
       }
       return next(err);
     });
@@ -28,14 +30,14 @@ const deleteCard = (req, res, next) => {
       if (card.owner.toString() === req.user._id) {
         return Card.findByIdAndRemove(cardId).then(() => res.status(200).send(card));
       }
-      return res.status(FORBIDDEN).send({ message: 'Ошибка доступа' });
+      return new ForbiddenError('Ошибка доступа');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
+        return new BadRequestError('Введены некорректные данные');
       }
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOT_FOUND).send({ message: 'Карточка с таким ID не найдена' });
+        return new NotFoundError('Карточка с таким ID не найдена');
       }
       return next(err);
     });
@@ -49,17 +51,13 @@ const likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => {
-      if (!card) {
-        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
-        return;
-      }
-      res.status(200).send(card);
+    .orFail(() => {
+      throw new NotFoundError('Карточка с таким ID не найдена');
     })
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
-        return;
+        next(new BadRequestError('Введены некорректные данные'));
       }
       next(err);
     });
@@ -73,16 +71,13 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => {
-      if (!card) {
-        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
-      }
-      return res.send(card);
+    .orFail(() => {
+      throw new NotFoundError('Карточка с таким ID не найдена');
     })
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Введены некорректные данные' });
-        return;
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Введены некорректные данные'));
       }
       next(err);
     });
