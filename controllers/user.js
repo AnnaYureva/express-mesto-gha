@@ -64,8 +64,9 @@ const createUser = (req, res, next) => {
 
 const updateProfile = (req, res, next) => {
   const { name, about } = req.body;
+  const { userId } = req.user._id;
   return User.findByIdAndUpdate(
-    req.user._id,
+    userId,
     { name, about },
     { new: true, runValidators: true },
   )
@@ -85,8 +86,9 @@ const updateProfile = (req, res, next) => {
 // редактируем фотографию пользователя
 const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
+  const { userId } = req.user._id;
   return User.findByIdAndUpdate(
-    req.user._id,
+    userId,
     { avatar },
     { new: true, runValidators: true },
   )
@@ -123,7 +125,7 @@ const login = (req, res, next) => {
 // контроллер для получения информации о пользователе
 
 const getCurrentUser = (req, res, next) => {
-  const { userId } = req.params;
+  const { userId } = req.user._id;
   return User.findById(userId)
     .orFail()
     .then((user) => res.send(user))
