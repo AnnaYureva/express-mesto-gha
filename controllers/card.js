@@ -9,7 +9,7 @@ const getCards = (req, res, next) => {
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const owner = req.user._id;
+  const owner = req.user;
   return Card.create({ name, link, owner })
     .then((card) => res.send(card))
     .catch((err) => {
@@ -21,7 +21,7 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  const { cardId } = req.card._id;
+  const { cardId } = req.card;
   return Card.findById(cardId)
     .orFail()
     .then((card) => {

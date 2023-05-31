@@ -125,7 +125,7 @@ const login = (req, res, next) => {
 // контроллер для получения информации о пользователе
 
 const getCurrentUser = (req, res, next) => {
-  const { userId } = req.user._id;
+  const { userId } = req.user;
   return User.findById(userId)
     .orFail()
     .then((user) => res.send(user))
