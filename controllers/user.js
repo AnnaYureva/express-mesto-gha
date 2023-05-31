@@ -116,8 +116,7 @@ const login = (req, res, next) => {
       if (!matched) {
         return res.status(AUTH_ERROR).send({ message: 'Неправильные почта или пароль' });
       }
-      // eslint-disable-next-line no-undef
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: User._id }, 'some-secret-key', { expiresIn: '7d' });
       return res.send({ token });
     })
     .catch(next);
@@ -126,7 +125,7 @@ const login = (req, res, next) => {
 // контроллер для получения информации о пользователе
 
 const getCurrentUser = (req, res, next) => {
-  User.findById(req._id)
+  User.findById(req.User._id)
     .orFail()
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
