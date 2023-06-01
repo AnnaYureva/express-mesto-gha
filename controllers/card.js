@@ -17,8 +17,9 @@ const createCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Введены некорректные данные'));
+      } else {
+        next(err);
       }
-      return next(err);
     });
 };
 
@@ -33,13 +34,11 @@ const deleteCard = (req, res, next) => {
       return next(new ForbiddenError('Ошибка доступа'));
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Введены некорректные данные'));
-      }
       if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Карточка с таким ID не найдена'));
+      } else {
+        next(err);
       }
-      return next(err);
     });
 };
 
@@ -58,8 +57,9 @@ const likeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Введены некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -78,8 +78,9 @@ const dislikeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Введены некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 

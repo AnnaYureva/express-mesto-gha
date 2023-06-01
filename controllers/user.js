@@ -21,13 +21,11 @@ const getUserById = (req, res, next) => {
     .orFail()
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Неверный запрос'));
-      }
       if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Пользователь не найден'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -51,11 +49,11 @@ const createUser = (req, res, next) => {
     .catch((err) => {
       if (err.code === 11000) {
         next(new ConflictError('Пользователь с таким email уже существует'));
-      }
-      if (err.name === 'ValidationError') {
+      } else if (err.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные пользователя'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -73,11 +71,11 @@ const updateProfile = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные профиля'));
-      }
-      if (err.name === 'DocumentNotFoundError') {
+      } else if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Пользователь не найден'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -94,11 +92,11 @@ const updateAvatar = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные профиля'));
-      }
-      if (err.name === 'DocumentNotFoundError') {
+      } else if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Пользователь не найден'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -120,15 +118,14 @@ const login = (req, res, next) => {
 
 const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
+    .orFail()
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Пользователь не найден'));
-      }
       if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Пользователь c таким ID не найден'));
+      } else {
+        next(err);
       }
-      return next(err);
     });
 };
 
